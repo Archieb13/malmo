@@ -24,7 +24,7 @@ import os
 import sys
 import time
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 # More interesting generator string: "3;7,44*49,73,35:1,159:4,95:13,35:13,159:11,95:10,159:14,159:6,35:6,95:6;12;"
 
@@ -59,11 +59,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 my_mission = MalmoPython.MissionSpec(missionXML, True)
@@ -77,23 +77,23 @@ for retry in range(max_retries):
         break
     except RuntimeError as e:
         if retry == max_retries - 1:
-            print "Error starting mission:",e
+            print("Error starting mission:",e)
             exit(1)
         else:
             time.sleep(2)
 
 # Loop until mission starts:
-print "Waiting for the mission to start ",
+print("Waiting for the mission to start ", end=' ')
 world_state = agent_host.getWorldState()
 while not world_state.has_mission_begun:
     sys.stdout.write(".")
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
 
-print
-print "Mission running ",
+print()
+print("Mission running ", end=' ')
 
 # Loop until mission ends:
 while world_state.is_mission_running:
@@ -101,8 +101,8 @@ while world_state.is_mission_running:
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
 
-print
-print "Mission ended"
+print()
+print("Mission ended")
 # Mission has ended.

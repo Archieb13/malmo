@@ -86,12 +86,12 @@ def createTestStructure(sx, sy, sz):
     iterations = random.randint(20,25)
 
     # Run a cellular automata for a few iterations:
-    for i in xrange(iterations):
+    for i in range(iterations):
         if i == iterations - 1:
             colour = True   # Final iteration: don't apply the CA, just colour the cell.
-        for x in xrange(sx):
-            for y in xrange(sy):
-                for z in xrange(sz):
+        for x in range(sx):
+            for y in range(sy):
+                for z in range(sz):
                     tot = sum(neighbours(x,y,z)) - s[x][y][z]
                     result = s[x][y][z]
                     if colour:
@@ -111,8 +111,8 @@ def createTestStructure(sx, sy, sz):
         # copy next generation into source matrix.
         s = copy.deepcopy(t)
     # Give it a floor:
-    for x in xrange(sx):
-        for z in xrange(sz):
+    for x in range(sx):
+        for z in range(sz):
             s[x][0][z] = 26
 
     return s
@@ -132,9 +132,9 @@ def makePath(s, xorg, yorg, zorg, path_type):
     startpos = (0,0,0)
 
     # Build the graph:
-    for x in xrange(SIZE_X):
-        for y in xrange(SIZE_Y):
-            for z in xrange(SIZE_Z):
+    for x in range(SIZE_X):
+        for y in range(SIZE_Y):
+            for z in range(SIZE_Z):
                 # Can we stand on this block?
                 if not standable(x,y,z):
                     continue
@@ -142,8 +142,8 @@ def makePath(s, xorg, yorg, zorg, path_type):
                     startpos = (x,y,z)
                 jumpy = jumpable(x,y,z) and y < SIZE_Y - 1
                 # Enumerate accessible neighbours:
-                for dx in xrange(-1,2):
-                    for dz in xrange(-1,2):
+                for dx in range(-1,2):
+                    for dz in range(-1,2):
                         if dx==0 and dz==0:
                             continue
                         if dx != 0 and dz != 0:
@@ -159,7 +159,7 @@ def makePath(s, xorg, yorg, zorg, path_type):
 
     # Now search to lowest reachable point:
     queue = deque([startpos])
-    points = [(False,0) for i in xrange(SIZE_X * SIZE_Y * SIZE_Z)]
+    points = [(False,0) for i in range(SIZE_X * SIZE_Y * SIZE_Z)]
     start_ind = index(startpos[0], startpos[1], startpos[2])
     points[start_ind] = (True,0)
     node = startpos
@@ -204,12 +204,12 @@ def makePath(s, xorg, yorg, zorg, path_type):
 def structureToXML(structure, xorg, yorg, zorg, pallette):
     # Take the structure and create a drawing decorator for it.
     drawing = ""
-    for y in xrange(SIZE_Y):
-        for z in xrange(SIZE_Z):
-            for x in xrange(SIZE_X):
+    for y in range(SIZE_Y):
+        for z in range(SIZE_Z):
+            for x in range(SIZE_X):
                 value = structure[x][y][z]
                 if value > 0:
-                    type = pallette[value/5]
+                    type = pallette[int(value/5)]
                     parts = type.split()
                     type_string = ' type="' + parts[0] + '"'
                     if len(parts) > 1:
@@ -343,7 +343,7 @@ def getMissionXML(forceReset, structure, mode, pathtype, mission_description):
 
 def sendCommand(ah, command):
     if SHOW_COMMANDS:
-        print command
+        print(command)
     ah.sendCommand(command)
 
 def steerAgent(ah, description, dir, mode):
@@ -374,18 +374,18 @@ def steerAgent(ah, description, dir, mode):
             sendCommand(ah, str(description) + "move " + str(move_values[dir]))
             return True
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 agent_host = MalmoPython.AgentHost()
 agent_host.addOptionalStringArgument( "recordingDir,r", "Path to location for saving mission recordings", "" )
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 num_iterations = 30000
@@ -407,7 +407,7 @@ if len(recordingsDirectory) > 0:
     my_mission_record.recordCommands()
     my_mission_record.recordMP4(24,2000000)
 
-for i in xrange(num_iterations):
+for i in range(num_iterations):
     structure = createTestStructure(SIZE_X, SIZE_Y, SIZE_Z)
     mode = i % len(MovementModes)
     pathtype = PathTypes.Silly if (i / len(MovementModes)) % 2 == 0 else PathTypes.Sensible
@@ -415,12 +415,12 @@ for i in xrange(num_iterations):
     missionXML = getMissionXML('"false"', structure, mode, pathtype, description)
     if recording:
         my_mission_record.setDestination(recordingsDirectory + "//" + "Mission_" + str(i+1) + ".tgz")
-    my_mission = MalmoPython.MissionSpec(missionXML, True)
+    my_mission = MalmoPython.MissionSpec(missionXML, False)
 
-    print ""
-    print ""
-    print description
-    print '=' * len(description)
+    print("")
+    print("")
+    print(description)
+    print('=' * len(description))
 
     max_retries = 3
     for retry in range(max_retries):
@@ -429,7 +429,7 @@ for i in xrange(num_iterations):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission:",e
+                print("Error starting mission:",e)
                 exit(1)
             else:
                 time.sleep(2)
@@ -439,7 +439,7 @@ for i in xrange(num_iterations):
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.getWorldState()
-    print
+    print()
 
     moving = False
     last_subgoal = None
@@ -450,10 +450,10 @@ for i in xrange(num_iterations):
             ob = json.loads(msg)
             if 'nextSubgoal' in ob:
                 moving = True
-                subgoal = ob.get(u'nextSubgoal')
+                subgoal = ob.get('nextSubgoal')
                 if subgoal != last_subgoal:
-                    description = subgoal[u'description']
-                    dir = int(0.5 + (ob.get(u'yawDelta', 0) + 1) * 2)
+                    description = subgoal['description']
+                    dir = int(0.5 + (ob.get('yawDelta', 0) + 1) * 2)
                     doneWithSubgoal = steerAgent(agent_host, description, dir, mode)
                     if doneWithSubgoal:
                         last_subgoal = subgoal
@@ -469,8 +469,8 @@ for i in xrange(num_iterations):
     ns_dict = {"malmo":"http://ProjectMalmo.microsoft.com"}
     stat = mission_end_tree.find("malmo:Status", ns_dict).text
     hr_stat = mission_end_tree.find("malmo:HumanReadableStatus", ns_dict).text
-    print "Mission over. Status: ", stat,
+    print("Mission over. Status: ", stat, end=' ')
     if len(hr_stat):
-        print " - " + hr_stat
+        print(" - " + hr_stat)
     if agent_host.receivedArgument("test") and "ERROR" in hr_stat:
         exit(1)

@@ -34,8 +34,10 @@ import sys
 import time
 import uuid
 import errno
+import io
+from PIL import Image
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 # Create somewhere to store any failed frames:
 FAILED_FRAME_DIR = "VisibilityTest_FailedFrames"
@@ -55,11 +57,11 @@ agent_hosts[0].addOptionalIntArgument("agents,n", "Number of agents to use.", 4)
 try:
     agent_hosts[0].parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_hosts[0].getUsage()
+    print('ERROR:',e)
+    print(agent_hosts[0].getUsage())
     exit(1)
 if agent_hosts[0].receivedArgument("help"):
-    print agent_hosts[0].getUsage()
+    print(agent_hosts[0].getUsage())
     exit(0)
 
 DEBUG = agent_hosts[0].receivedArgument("debug")
@@ -68,7 +70,7 @@ INTEGRATION_TEST_MODE = agent_hosts[0].receivedArgument("test")
 agents_requested = agent_hosts[0].getIntArgument("agents")
 NUM_AGENTS = max(2,min(agents_requested,4))
 if NUM_AGENTS != agents_requested:
-    print "WARNING: using", NUM_AGENTS, "agents, rather than", agents_requested
+    print("WARNING: using", NUM_AGENTS, "agents, rather than", agents_requested)
 
 # Create the rest of the agents:
 agent_hosts += [MalmoPython.AgentHost() for x in range(1, NUM_AGENTS) ]
@@ -80,7 +82,7 @@ failed_frame_count = 0
 
 # Dependencies for gui:
 if SHOW_GUI:
-    from Tkinter import *
+    from tkinter import *
     from PIL import Image
     from PIL import ImageTk
 
@@ -99,7 +101,7 @@ else:
 bmp_original = 0
 bmp_luminance = 1
 bmp_thresholded = 2
-bitmaps = [[(-1, None) for bmp_type in [bmp_original, bmp_luminance, bmp_thresholded]] for x in xrange(NUM_AGENTS)]
+bitmaps = [[(-1, None) for bmp_type in [bmp_original, bmp_luminance, bmp_thresholded]] for x in range(NUM_AGENTS)]
 
 def startMission(agent_host, my_mission, my_client_pool, my_mission_record, role, expId):
     max_retries = 10
@@ -110,15 +112,15 @@ def startMission(agent_host, my_mission, my_client_pool, my_mission_record, role
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 # In a multi-agent mission, startMission will fail if the integrated server
                 # hasn't yet started - so if none of our clients were available, that may be the
                 # reason. To catch this specifically we could check the results for "MALMONOSERVERYET",
                 # but it should be sufficient to simply wait a bit and try again.
-                for i in xrange(10):
+                for i in range(10):
                     time.sleep(0.1)
                     if SHOW_GUI:
                         root.update()
@@ -159,9 +161,9 @@ def processFrame(width, height, pixels, agent, mission_count):
         bitmaps[agent][bmp_original] = (handle, photo_original)
 
     # 2. Convert RGB to luminance. Build up a histogram as we go - this will be useful for finding a threshold point.
-    hist = [0 for x in xrange(256)]
-    for col in xrange(0, width*channels, channels):
-        for row in xrange(0, num_rows):
+    hist = [0 for x in range(256)]
+    for col in range(0, width*channels, channels):
+        for row in range(0, num_rows):
             pix = col + row * width * channels
             lum = int(0.2126 * middle_strip[pix] + 0.7152 * middle_strip[pix + 1] + 0.0722 * middle_strip[pix + 2])
             hist[lum] += 1
@@ -178,14 +180,14 @@ def processFrame(width, height, pixels, agent, mission_count):
     # 3. Calculate a suitable threshold, using the Otsu method
     total_pixels = width * num_rows
     total_sum = 0.
-    for t in xrange(256):
+    for t in range(256):
         total_sum += t * hist[t]
     sum_background = 0.
     weight_background = 0.
     weight_foreground = 0.
     max_variation = 0.
     threshold = 0
-    for t in xrange(256):
+    for t in range(256):
         weight_background += hist[t]
         if weight_background == 0:
             continue
@@ -202,7 +204,7 @@ def processFrame(width, height, pixels, agent, mission_count):
             threshold = t
 
     # 4. Apply this threshold
-    for pix in xrange(len(middle_strip)):
+    for pix in range(len(middle_strip)):
         if middle_strip[pix] <= threshold:
             middle_strip[pix] = 255
         else:
@@ -212,17 +214,17 @@ def processFrame(width, height, pixels, agent, mission_count):
     # At the same time, we count the number of changes (from foreground to background, or background to foreground)
     # that occur across the scanline. Assuming that there are no partial agents at the sides of the view - ie the scanline
     # starts and ends with background - this count should result in two changes per visible agent.
-    pixelvalue = lambda col: sum(middle_strip[x] for x in xrange(col, len(middle_strip), width * channels))
+    pixelvalue = lambda col: sum(middle_strip[x] for x in range(col, len(middle_strip), width * channels))
     lastval = 255
     changes = 0
-    for col in xrange(0, width * channels, channels):
+    for col in range(0, width * channels, channels):
         val = 0 if pixelvalue(col) > 0 else 255
         if lastval != val:
             changes += 1
         lastval = val
         if SHOW_GUI:
             # Update the bitmap so the user can see what we see.
-            for row in xrange(num_rows):
+            for row in range(num_rows):
                 middle_strip[col + row*width*channels] = val
                 middle_strip[1 + col + row*width*channels] = val
                 middle_strip[2 + col + row*width*channels] = 0  # blue channel always 0 (will simplify recolouring later)
@@ -236,7 +238,7 @@ def processFrame(width, height, pixels, agent, mission_count):
     # the relevant channel.)
     if SHOW_GUI:
         channel_mask = 0 if test_passed else 1  # Remove red channel for success, remove green for failure
-        for pixel in xrange(channel_mask, len(middle_strip), channels):
+        for pixel in range(channel_mask, len(middle_strip), channels):
             middle_strip[pixel] = 0
         # And add this to the GUI:
         image_threshold = Image.frombytes('RGB', (width, num_rows), str(middle_strip))
@@ -252,7 +254,8 @@ def processFrame(width, height, pixels, agent, mission_count):
         # The threshold is not entirely bullet-proof - sometimes there are drawing artifacts that can result in
         # false negatives.
         # So we save a copy of the failing frames for manual inspection:
-        image_failed = Image.frombytes('RGB', (width, height), str(pixels))
+        image_io = io.BytesIO(pixels)
+        image_failed = Image.frombytes('RGB', (width, height), image_io)
         image_failed.save(FAILED_FRAME_DIR + "/failed_frame_agent_" + str(agent) + "_mission_" + str(mission_count) + "_" + str(failed_frame_count) + ".png")
         failed_frame_count += 1
     return test_passed
@@ -282,7 +285,7 @@ def createMissionXML(num_agents, width, height, reset):
 
     # Add an agent section for each watcher.
     # We put them in a leather helmet because it makes the image processing slightly easier.
-    for i in xrange(num_agents):
+    for i in range(num_agents):
         placement = getPlacementString(i)
         xml += '''<AgentSection mode="Survival">
         <Name>Watcher#''' + str(i) + '''</Name>
@@ -311,18 +314,18 @@ def createMissionXML(num_agents, width, height, reset):
 # are attempting to find the server - so this will fail for any agents on a
 # different machine.
 client_pool = MalmoPython.ClientPool()
-for x in xrange(10000, 10000 + NUM_AGENTS):
+for x in range(10000, 10000 + NUM_AGENTS):
     client_pool.add( MalmoPython.ClientInfo('127.0.0.1', x) )
 
-failed_frames = [0 for x in xrange(NUM_AGENTS)] # keep a count of the frames that failed for each agent.
+failed_frames = [0 for x in range(NUM_AGENTS)] # keep a count of the frames that failed for each agent.
 
 # If we're running as part of the integration tests, just do ten iterations. Otherwise keep going.
 missions_to_run = 10 if INTEGRATION_TEST_MODE else 30000
 
-for mission_no in xrange(1,missions_to_run+1):
+for mission_no in range(1,missions_to_run+1):
     # Create the mission. Force reset for the first mission, to ensure a clean world. No need for subsequent missions.
     my_mission = MalmoPython.MissionSpec(createMissionXML(NUM_AGENTS, WIDTH, HEIGHT, "true" if mission_no == 1 else "false"), True)
-    print "Running mission #" + str(mission_no)
+    print("Running mission #" + str(mission_no))
     # Generate an experiment ID for this mission.
     # This is used to make sure the right clients join the right servers -
     # if the experiment IDs don't match, the startMission request will be rejected.
@@ -343,7 +346,7 @@ for mission_no in xrange(1,missions_to_run+1):
 
     # Wait for mission to start - complicated by having multiple agent hosts, and the potential
     # for multiple errors to occur in the start-up process.
-    print "Waiting for the mission to start ",
+    print("Waiting for the mission to start ", end=' ')
     hasBegun = False
     hadErrors = False
     while not hasBegun and not hadErrors:
@@ -356,12 +359,12 @@ for mission_no in xrange(1,missions_to_run+1):
                 hasBegun = False
             if len(world_state.errors):
                 hadErrors = True
-                print "Errors from agent " + agentName(agent_hosts.index(ah))
+                print("Errors from agent " + agentName(agent_hosts.index(ah)))
                 for error in world_state.errors:
-                    print "Error:",error.text
+                    print("Error:",error.text)
 
     if hadErrors:
-        print "ABORTING"
+        print("ABORTING")
         exit(1)
 
     time.sleep(1)
@@ -370,7 +373,7 @@ for mission_no in xrange(1,missions_to_run+1):
     # Main mission loop.
     # In this test, all we do is stand still and process our frames.
     while not timed_out:
-        for i in xrange(NUM_AGENTS):
+        for i in range(NUM_AGENTS):
             ah = agent_hosts[i]
             world_state = ah.getWorldState()
             if world_state.is_mission_running == False:
@@ -380,12 +383,12 @@ for mission_no in xrange(1,missions_to_run+1):
                 can_see_agent = processFrame(frame.width, frame.height, frame.pixels, i, mission_no)
                 if not can_see_agent:
                     failed_frames[i] += 1
-    print
+    print()
 
     if SHOW_GUI:
         canvas.delete("all")    # Clear the gui window in between each mission.
 
-    print "Waiting for mission to end ",
+    print("Waiting for mission to end ", end=' ')
     hasEnded = False
     while not hasEnded:
         sys.stdout.write(".")
@@ -394,8 +397,8 @@ for mission_no in xrange(1,missions_to_run+1):
             world_state = ah.getWorldState()
             if not world_state.is_mission_running:
                 hasEnded = True
-    print
-    print "Failed frames: ", failed_frames
+    print()
+    print("Failed frames: ", failed_frames)
     if INTEGRATION_TEST_MODE and sum(failed_frames):
         exit(1) # Test failed - quit.
     time.sleep(2)

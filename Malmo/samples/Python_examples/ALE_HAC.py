@@ -23,7 +23,7 @@ import random
 import sys
 import time
 import errno
-import Tkinter as tk
+import tkinter as tk
 from PIL import Image, ImageTk
 from array import array
 from struct import pack
@@ -133,18 +133,18 @@ def startGame():
             display_gui = 0
         agent_host.startMission( my_mission, MalmoPython.ClientPool(), my_mission_record, display_gui, rom_file )
     except RuntimeError as e:
-        print "Error starting mission:",e
+        print("Error starting mission:",e)
         exit(1)
 
-    print "Waiting for the mission to start",
+    print("Waiting for the mission to start", end=' ')
     world_state = agent_host.getWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.getWorldState()
         for error in world_state.errors:
-            print "Error:",error.text
-    print
+            print("Error:",error.text)
+    print()
 
     gamestats = "Go " + str(gameNum+1) + " out of " + str(iterations) + "\n"
     canvas.delete("all")
@@ -187,9 +187,9 @@ def sendCommand():
         world_state = agent_host.getWorldState()
         for reward in world_state.rewards:
             if reward.getValue() > 0:
-                print "Summed reward:",reward.getValue()
+                print("Summed reward:",reward.getValue())
         for error in world_state.errors:
-            print "Error:",error.text
+            print("Error:",error.text)
         if world_state.number_of_video_frames_since_last_state > 0 and want_own_display:
             # Turn the frame into an image to display on our canvas.
             frame = world_state.video_frames[-1]
@@ -212,7 +212,7 @@ def sendCommand():
 root.bind_all('<KeyPress>', keyDown)
 root.bind_all('<KeyRelease>', keyUp)
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 agent_host = MalmoPython.ALEAgentHost()
 # add some arguments:
@@ -223,11 +223,11 @@ agent_host.addOptionalIntArgument('goes', 'Number of goes at the game.', 2)
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 rom_file = agent_host.getStringArgument('rom_file')
@@ -246,6 +246,6 @@ except OSError as exception:
 
 startGame() # Get things up and ready...
 root.mainloop() # and enter the event loop
-print "Mission has stopped."
+print("Mission has stopped.")
 os.system('xset r on')  # set auto-repeat back
 

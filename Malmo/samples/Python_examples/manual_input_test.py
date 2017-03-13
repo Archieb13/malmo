@@ -81,7 +81,7 @@ def GetMissionXML( current_seed ):
   </Mission>'''
   
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 validate = True
 my_mission = MalmoPython.MissionSpec(GetMissionXML("random"),validate)
@@ -91,11 +91,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 if agent_host.receivedArgument("test"):
@@ -112,18 +112,18 @@ for retry in range(max_retries):
         break
     except RuntimeError as e:
         if retry == max_retries - 1:
-            print "Error starting mission:",e
+            print("Error starting mission:",e)
             exit(1)
         else:
             time.sleep(2)
 
-print "Waiting for the mission to start",
+print("Waiting for the mission to start", end=' ')
 world_state = agent_host.getWorldState()
 while not world_state.has_mission_begun:
     sys.stdout.write(".")
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
-print
+print()
 
 # main loop:
 while world_state.is_mission_running:
@@ -131,8 +131,8 @@ while world_state.is_mission_running:
         nb = "movesouth 1"
         time.sleep(1)
     else:
-        nb = raw_input('Enter command: ')
+        nb = input('Enter command: ')
     agent_host.sendCommand(nb)
     world_state = agent_host.getWorldState()
 
-print "Mission has stopped."
+print("Mission has stopped.")

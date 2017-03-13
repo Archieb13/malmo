@@ -80,7 +80,7 @@ def GetMissionXML(num):
 
     </Mission>'''
   
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 validate = True
 
@@ -105,11 +105,11 @@ agent_host.addOptionalFloatArgument( "wait,w", "Number of seconds to wait betwee
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 PATH_LENGTH = agent_host.getIntArgument("length")
@@ -119,7 +119,7 @@ MISSION_LENGTH = 30
 NUM_REPEATS = 10
 
 if agent_host.receivedArgument("test"):
-    print "Using test setings (overrides other command-line arguments)."
+    print("Using test setings (overrides other command-line arguments).")
     NUM_REPEATS = 1
     WAIT_TIME = 0.2
     STOP = True
@@ -136,7 +136,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST: # ignore error if already existed
         raise
 
-for iRepeat in xrange(NUM_REPEATS):
+for iRepeat in range(NUM_REPEATS):
     my_mission = MalmoPython.MissionSpec(GetMissionXML(iRepeat), validate)
     # Set up a recording
     my_mission_record = MalmoPython.MissionRecordSpec(recordingsDirectory + "//QuitFromReachingPosition_Test" + str(iRepeat) + ".tgz");
@@ -149,7 +149,7 @@ for iRepeat in xrange(NUM_REPEATS):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission:",e
+                print("Error starting mission:",e)
                 exit(1)
             else:
                 time.sleep(2)
@@ -160,11 +160,11 @@ for iRepeat in xrange(NUM_REPEATS):
         sys.stdout.write(".")
         world_state = agent_host.getWorldState()
         if len(world_state.errors):
-            print
+            print()
             for error in world_state.errors:
-                print "Error:",error.text
+                print("Error:",error.text)
                 exit()
-    print
+    print()
 
     # main loop:
     distance = 0
@@ -180,7 +180,7 @@ for iRepeat in xrange(NUM_REPEATS):
         if world_state.number_of_observations_since_last_state > 0:
             for ob in world_state.observations:
                 jsob = json.loads(ob.text)
-                distance = jsob.get(u'distanceFromStart', 0)
+                distance = jsob.get('distanceFromStart', 0)
                 sys.stdout.write('O{0:.0f}'.format(distance))
         if world_state.number_of_rewards_since_last_state > 0:
             for rew in world_state.rewards:
@@ -198,16 +198,16 @@ for iRepeat in xrange(NUM_REPEATS):
         else:
             sys.stdout.write("F")
         sys.stdout.write(" ")
-    print
-    print "Mission Ended - sent " + str(commands_sent) + " commands; final reward: " + str(total_rewards)
+    print()
+    print("Mission Ended - sent " + str(commands_sent) + " commands; final reward: " + str(total_rewards))
     if total_rewards != 100:
-        print "ERROR - FAILED TO GET CORRECT REWARD!"
+        print("ERROR - FAILED TO GET CORRECT REWARD!")
         if total_rewards < 0:
-            print "We overran! Quit producer did not produce a quit quickly enough!"
-    print
+            print("We overran! Quit producer did not produce a quit quickly enough!")
+    print()
 
     if agent_host.receivedArgument("test"):
         if commands_sent != PATH_LENGTH or total_rewards != 100:
-            print "Number of commands sent, or total rewards received, did not match expectations."
+            print("Number of commands sent, or total rewards received, did not match expectations.")
             exit(1)
 time.sleep(1)

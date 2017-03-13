@@ -76,7 +76,7 @@ def SetVelocity(vel):
 def SetTurn(turn):
     agent_host.sendCommand( "turn " + str(turn) )
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 validate = True
 # Create a pool of Minecraft Mod clients.
@@ -93,11 +93,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 if agent_host.receivedArgument("test"):
@@ -117,8 +117,8 @@ for iRepeat in range(num_reps):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 time.sleep(2)
@@ -168,7 +168,7 @@ for iRepeat in range(num_reps):
         time.sleep(0.1)
         
     # mission has ended.
-    print "Mission " + str(iRepeat+1) + ": Reward = " + str(reward)
+    print("Mission " + str(iRepeat+1) + ": Reward = " + str(reward))
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
     time.sleep(0.5) # Give the mod a little time to prepare for the next mission.

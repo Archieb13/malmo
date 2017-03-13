@@ -29,7 +29,7 @@ import json
 import random
 import errno
 import math
-import Tkinter as tk
+import tkinter as tk
 from collections import namedtuple
 EntityInfo = namedtuple('EntityInfo', 'x, y, z, yaw, pitch, name, colour, variation, quantity')
 EntityInfo.__new__.__defaults__ = (0, 0, 0, 0, 0, "", "", "", 1)
@@ -70,8 +70,8 @@ def getItemXML():
 
 def getCorner(index,top,left,expand=0,y=206):
     ''' Return part of the XML string that defines the requested corner'''
-    x = str(-(expand+ARENA_WIDTH/2)) if left else str(expand+ARENA_WIDTH/2)
-    z = str(-(expand+ARENA_BREADTH/2)) if top else str(expand+ARENA_BREADTH/2)
+    x = str(int(-(expand+ARENA_WIDTH/2))) if left else str(int(expand+ARENA_WIDTH/2))
+    z = str(int(-(expand+ARENA_BREADTH/2))) if top else str(int(expand+ARENA_BREADTH/2))
     return 'x'+index+'="'+x+'" y'+index+'="' +str(y)+'" z'+index+'="'+z+'"'
 
 def getMissionXML(summary):
@@ -140,7 +140,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST: # ignore error if already existed
         raise
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 root = tk.Tk()
 root.wm_title("Collect the " + GOAL_TYPE + "s, dodge the " + MOB_TYPE + "s!")
@@ -169,7 +169,7 @@ def getBestAngle(entities, current_yaw, current_health):
         current_yaw -= 360
 
     # Look for best option
-    for i in xrange(agent_search_resolution):
+    for i in range(agent_search_resolution):
         # Calculate cost of turning:
         ang = 2 * math.pi * (i / float(agent_search_resolution))
         yaw = i * 360.0 / float(agent_search_resolution)
@@ -245,11 +245,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 if agent_host.receivedArgument("test"):
@@ -275,8 +275,8 @@ for iRepeat in range(num_reps):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 time.sleep(2)
@@ -297,9 +297,9 @@ for iRepeat in range(num_reps):
             msg = world_state.observations[-1].text
             ob = json.loads(msg)
             if "Yaw" in ob:
-                current_yaw = ob[u'Yaw']
+                current_yaw = ob['Yaw']
             if "Life" in ob:
-                life = ob[u'Life']
+                life = ob['Life']
                 if life < current_life:
                     agent_host.sendCommand("chat aaaaaaaaargh!!!")
                     flash = True
@@ -324,10 +324,10 @@ for iRepeat in range(num_reps):
 
     # mission has ended.
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
     if world_state.number_of_rewards_since_last_state > 0:
         # A reward signal has come in - see what it is:
         total_reward += world_state.rewards[-1].getValue()
 
-    print "We stayed alive for " + str(total_commands) + " commands, and scored " + str(total_reward)
+    print("We stayed alive for " + str(total_commands) + " commands, and scored " + str(total_reward))
     time.sleep(1) # Give the mod a little time to prepare for the next mission.

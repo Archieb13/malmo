@@ -24,7 +24,7 @@ import os
 import sys
 import time
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 def Menger(xorg, yorg, zorg, size, blocktype, variant, holetype):
     #draw solid chunk
@@ -33,8 +33,8 @@ def Menger(xorg, yorg, zorg, size, blocktype, variant, holetype):
     unit = size
     while (unit >= 3):
         w=unit/3
-        for i in xrange(0, size, unit):
-            for j in xrange(0, size, unit):
+        for i in range(0, int(size), int(unit)):
+            for j in range(0, int(size), int(unit)):
                 x=xorg+i
                 y=yorg+j
                 genstring += GenCuboid(x+w,y+w,zorg,(x+2*w)-1,(y+2*w)-1,zorg+size-1,holetype) + "\n"
@@ -46,7 +46,9 @@ def Menger(xorg, yorg, zorg, size, blocktype, variant, holetype):
     return genstring
 
 def GenCuboid(x1, y1, z1, x2, y2, z2, blocktype):
-    return '<DrawCuboid x1="' + str(x1) + '" y1="' + str(y1) + '" z1="' + str(z1) + '" x2="' + str(x2) + '" y2="' + str(y2) + '" z2="' + str(z2) + '" type="' + blocktype + '"/>'
+    bob= '<DrawCuboid x1="' + str(x1) + '" y1="' + str(y1) + '" z1="' + str(z1) + '" x2="' + str(x2) + '" y2="' + str(y2) + '" z2="' + str(z2) + '" type="' + blocktype + '"/>'
+    print(bob)
+    return bob
 
 def GenCuboidWithVariant(x1, y1, z1, x2, y2, z2, blocktype, variant):
     return '<DrawCuboid x1="' + str(x1) + '" y1="' + str(y1) + '" z1="' + str(z1) + '" x2="' + str(x2) + '" y2="' + str(y2) + '" z2="' + str(z2) + '" type="' + blocktype + '" variant="' + variant + '"/>'
@@ -102,14 +104,14 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
-my_mission = MalmoPython.MissionSpec(missionXML, True)
+my_mission = MalmoPython.MissionSpec(missionXML, False)
 my_mission_record = MalmoPython.MissionRecordSpec()
 
 # Attempt to start a mission:
@@ -120,23 +122,23 @@ for retry in range(max_retries):
         break
     except RuntimeError as e:
         if retry == max_retries - 1:
-            print "Error starting mission:",e
+            print("Error starting mission:",e)
             exit(1)
         else:
             time.sleep(2)
 
 # Loop until mission starts:
-print "Waiting for the mission to start ",
+print("Waiting for the mission to start ", end=' ')
 world_state = agent_host.getWorldState()
 while not world_state.has_mission_begun:
     sys.stdout.write(".")
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
 
-print
-print "Mission running ",
+print()
+print("Mission running ", end=' ')
 
 # ADD YOUR CODE HERE
 # TO GET YOUR AGENT TO THE DIAMOND BLOCK
@@ -147,8 +149,8 @@ while world_state.is_mission_running:
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
 
-print
-print "Mission ended"
+print()
+print("Mission ended")
 # Mission has ended.

@@ -47,23 +47,23 @@ my_mission.allowDiscreteMovementCommand("movenorth")
 my_mission.allowInventoryCommand("swapInventoryItems")
 
 if not my_mission.getSummary() == 'example mission':
-    print 'Unexpected summary'
+    print ('Unexpected summary')
     exit(1)
 
 if not list( my_mission.getListOfCommandHandlers(0) ) == [ 'ContinuousMovement', 'DiscreteMovement', 'Inventory' ]:
-    print 'Unexpected command handlers'
+    print ('Unexpected command handlers')
     exit(1)
 
 if not list( my_mission.getAllowedCommands(0,'ContinuousMovement') ) == [ 'move', 'strafe' ]:
-    print 'Unexpected continuous command'
+    print ('Unexpected continuous command')
     exit(1)
 
 if not list( my_mission.getAllowedCommands(0,'DiscreteMovement') ) == [ 'movenorth' ]:
-    print 'Unexpected discrete command'
+    print ('Unexpected discrete command')
     exit(1)
 
 if not list( my_mission.getAllowedCommands(0,'Inventory') ) == [ 'swapInventoryItems' ]:
-    print 'Unexpected inventory command'
+    print ('Unexpected inventory command')
     exit(1)
 
 pretty_print = False
@@ -76,7 +76,7 @@ my_mission2 = MalmoPython.MissionSpec( xml, validate )
 # check that we get the same XML if we go round again
 xml2 = my_mission2.getAsXML( pretty_print )
 if not xml2 == xml:
-    print 'Mismatch between first generation XML and the second:\n', xml, '\n\n', xml2
+    print(('Mismatch between first generation XML and the second:\n', xml, '\n\n', xml2))
     exit(1)
     
 # check that known-good XML validates
@@ -97,13 +97,13 @@ xml3 = ('<?xml version="1.0" encoding="UTF-8" ?><Mission xmlns="http://ProjectMa
 my_mission3 = MalmoPython.MissionSpec( xml3, validate )
 
 if not my_mission3.getSummary() == 'Run the maze!':
-    print 'Unexpected summary'
+    print ('Unexpected summary')
     exit(1)
 
 if not list( my_mission3.getListOfCommandHandlers(0) ) == [ 'ContinuousMovement' ]:
-    print 'Unexpected command handlers'
+    print ('Unexpected command handlers')
     exit(1)
 
 if not list( my_mission3.getAllowedCommands(0,'ContinuousMovement') ) == [ "jump", "move", "pitch", "strafe", "turn", "use" ]:
-    print 'Unexpected continuous command'
+    print ('Unexpected continuous command')
     exit(1)

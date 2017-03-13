@@ -103,21 +103,21 @@ def GetMissionXML( current_seed, xorg, yorg, zorg ):
         </AgentSection>
   </Mission>'''
   
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 agent_host = MalmoPython.AgentHost()
 agent_host.addOptionalIntArgument( "role,r", "For multi-agent missions, the role of this agent instance", 0)
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 role = agent_host.getIntArgument("role")
-print "Will run as role",role
+print("Will run as role",role)
 
 agent_host.setObservationsPolicy(MalmoPython.ObservationsPolicy.LATEST_OBSERVATION_ONLY)
 
@@ -136,9 +136,9 @@ for iRepeat in range(30000):
     zorg = ((iRepeat / 64) % 64) * 32
     yorg = 200 + ((iRepeat / (64*64)) % 64) * 8
 
-    print "Mission " + str(iRepeat) + " --- starting at " + str(xorg) + ", " + str(yorg) + ", " + str(zorg)
+    print("Mission " + str(iRepeat) + " --- starting at " + str(xorg) + ", " + str(yorg) + ", " + str(zorg))
     
-    validate = True
+    validate = False
     my_mission = MalmoPython.MissionSpec(GetMissionXML(iRepeat, xorg, yorg, zorg), validate)
     
     if agent_host.receivedArgument("test"):
@@ -153,12 +153,12 @@ for iRepeat in range(30000):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission:",e
+                print("Error starting mission:",e)
                 exit(1)
             else:
                 time.sleep(2)
 
-    print "Waiting for the mission to start",
+    print("Waiting for the mission to start", end=' ')
     world_state = agent_host.getWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
@@ -166,9 +166,9 @@ for iRepeat in range(30000):
         world_state = agent_host.getWorldState()
         if len(world_state.errors) > 0:
             for err in world_state.errors:
-                print err
+                print(err)
             exit(1)
-    print
+    print()
 
     # main loop:
     while world_state.is_mission_running:
@@ -176,7 +176,7 @@ for iRepeat in range(30000):
         if world_state.is_mission_running and world_state.number_of_observations_since_last_state > 0:
             msg = world_state.observations[-1].text
             ob = json.loads(msg)
-            current_yaw_delta = ob.get(u'yawDelta', 0)
+            current_yaw_delta = ob.get('yawDelta', 0)
             current_speed = 1-abs(current_yaw_delta)
             
             agent_host.sendCommand( "move " + str(current_speed) )
@@ -189,13 +189,13 @@ for iRepeat in range(30000):
             time.sleep(0.05)
         if len(world_state.errors) > 0:
             for err in world_state.errors:
-                print err
+                print(err)
             
-    print "Mission has stopped."
+    print("Mission has stopped.")
 
-    print 'Sleeping to give the clients a chance to reset...',
+    print('Sleeping to give the clients a chance to reset...', end=' ')
     if role > 0:
         time.sleep(10)
     else:
         time.sleep(5)
-    print 'done.'
+    print('done.')

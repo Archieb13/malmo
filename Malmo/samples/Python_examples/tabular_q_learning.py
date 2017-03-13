@@ -31,7 +31,7 @@ import os
 import random
 import sys
 import time
-import Tkinter as tk
+import tkinter as tk
 
 save_images = False
 if save_images:        
@@ -81,12 +81,12 @@ class TabQAgent:
         obs_text = world_state.observations[-1].text
         obs = json.loads(obs_text) # most recent observation
         self.logger.debug(obs)
-        if not u'XPos' in obs or not u'ZPos' in obs:
+        if not 'XPos' in obs or not 'ZPos' in obs:
             self.logger.error("Incomplete observation received: %s" % obs_text)
             return 0
-        current_s = "%d:%d" % (int(obs[u'XPos']), int(obs[u'ZPos']))
-        self.logger.debug("State: %s (x = %.2f, z = %.2f)" % (current_s, float(obs[u'XPos']), float(obs[u'ZPos'])))
-        if not self.q_table.has_key(current_s):
+        current_s = "%d:%d" % (int(obs['XPos']), int(obs['ZPos']))
+        self.logger.debug("State: %s (x = %.2f, z = %.2f)" % (current_s, float(obs['XPos']), float(obs['ZPos'])))
+        if current_s not in self.q_table:
             self.q_table[current_s] = ([0] * len(self.actions))
 
         # update Q values
@@ -95,7 +95,7 @@ class TabQAgent:
             self.q_table[self.prev_s][self.prev_a] = old_q + self.alpha * (current_r
                 + self.gamma * max(self.q_table[current_s]) - old_q)
 
-        self.drawQ( curr_x = int(obs[u'XPos']), curr_y = int(obs[u'ZPos']) )
+        self.drawQ( curr_x = int(obs['XPos']), curr_y = int(obs['ZPos']) )
 
         # select the next action
         rnd = random.random()
@@ -140,7 +140,7 @@ class TabQAgent:
             world_state = agent_host.peekWorldState()
         world_state = agent_host.getWorldState()
         for err in world_state.errors:
-            print err
+            print(err)
 
         if not world_state.is_mission_running:
             return 0 # mission already ended
@@ -148,9 +148,9 @@ class TabQAgent:
         assert len(world_state.video_frames) > 0, 'No video frames!?'
         
         obs = json.loads( world_state.observations[-1].text )
-        prev_x = obs[u'XPos']
-        prev_z = obs[u'ZPos']
-        print 'Initial position:',prev_x,',',prev_z
+        prev_x = obs['XPos']
+        prev_z = obs['ZPos']
+        print('Initial position:',prev_x,',',prev_z)
         
         if save_images:
             # save the frame, for debugging
@@ -170,22 +170,22 @@ class TabQAgent:
         while world_state.is_mission_running:
         
             # wait for the position to have changed and a reward received
-            print 'Waiting for data...',
+            print('Waiting for data...', end=' ')
             while True:
                 world_state = agent_host.peekWorldState()
                 if not world_state.is_mission_running:
-                    print 'mission ended.'
+                    print('mission ended.')
                     break
                 if len(world_state.rewards) > 0 and not all(e.text=='{}' for e in world_state.observations):
                     obs = json.loads( world_state.observations[-1].text )
-                    curr_x = obs[u'XPos']
-                    curr_z = obs[u'ZPos']
+                    curr_x = obs['XPos']
+                    curr_z = obs['ZPos']
                     if require_move:
                         if math.hypot( curr_x - prev_x, curr_z - prev_z ) > tol:
-                            print 'received.'
+                            print('received.')
                             break
                     else:
-                        print 'received.'
+                        print('received.')
                         break
             # wait for a frame to arrive after that
             num_frames_seen = world_state.number_of_video_frames_since_last_state
@@ -196,7 +196,7 @@ class TabQAgent:
             
             world_state = agent_host.getWorldState()
             for err in world_state.errors:
-                print err
+                print(err)
             current_r = sum(r.getValue() for r in world_state.rewards)
 
             if save_images:
@@ -214,27 +214,27 @@ class TabQAgent:
                 assert num_frames_after_get >= num_frames_before_get, 'Fewer frames after getWorldState!?'
                 frame = world_state.video_frames[-1]
                 obs = json.loads( world_state.observations[-1].text )
-                curr_x = obs[u'XPos']
-                curr_z = obs[u'ZPos']
-                print 'New position from observation:',curr_x,',',curr_z,'after action:',self.actions[self.prev_a], #NSWE
+                curr_x = obs['XPos']
+                curr_z = obs['ZPos']
+                print('New position from observation:',curr_x,',',curr_z,'after action:',self.actions[self.prev_a], end=' ') #NSWE
                 if check_expected_position:
                     expected_x = prev_x + [0,0,-1,1][self.prev_a]
                     expected_z = prev_z + [-1,1,0,0][self.prev_a]
                     if math.hypot( curr_x - expected_x, curr_z - expected_z ) > tol:
-                        print ' - ERROR DETECTED! Expected:',expected_x,',',expected_z
-                        raw_input("Press Enter to continue...")
+                        print(' - ERROR DETECTED! Expected:',expected_x,',',expected_z)
+                        input("Press Enter to continue...")
                     else:
-                        print 'as expected.'
+                        print('as expected.')
                     curr_x_from_render = frame.xPos
                     curr_z_from_render = frame.zPos
-                    print 'New position from render:',curr_x_from_render,',',curr_z_from_render,'after action:',self.actions[self.prev_a], #NSWE
+                    print('New position from render:',curr_x_from_render,',',curr_z_from_render,'after action:',self.actions[self.prev_a], end=' ') #NSWE
                     if math.hypot( curr_x_from_render - expected_x, curr_z_from_render - expected_z ) > tol:
-                        print ' - ERROR DETECTED! Expected:',expected_x,',',expected_z
-                        raw_input("Press Enter to continue...")
+                        print(' - ERROR DETECTED! Expected:',expected_x,',',expected_z)
+                        input("Press Enter to continue...")
                     else:
-                        print 'as expected.'
+                        print('as expected.')
                 else:
-                    print
+                    print()
                 prev_x = curr_x
                 prev_z = curr_z
                 # act
@@ -288,7 +288,7 @@ class TabQAgent:
                                      outline="#fff", fill="#fff" )
         self.root.update()
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 agent_host = MalmoPython.AgentHost()
 
@@ -307,11 +307,11 @@ agent_host.addOptionalFlag('debug', 'Turn on debugging.')
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 if agent_host.receivedArgument("test"):
@@ -332,7 +332,7 @@ if agent_host.receivedArgument("test"):
 else:
     num_maps = 30000
 
-for imap in xrange(num_maps):
+for imap in range(num_maps):
 
     # -- set up the agent -- #
     actionSet = ["movenorth 1", "movesouth 1", "movewest 1", "moveeast 1"]
@@ -349,7 +349,7 @@ for imap in xrange(num_maps):
     # -- set up the mission -- #
     mission_file = agent_host.getStringArgument('mission_file')
     with open(mission_file, 'r') as f:
-        print "Loading mission from %s" % mission_file
+        print("Loading mission from %s" % mission_file)
         mission_xml = f.read()
         my_mission = MalmoPython.MissionSpec(mission_xml, True)
     my_mission.removeAllCommandHandlers()
@@ -372,7 +372,7 @@ for imap in xrange(num_maps):
     cumulative_rewards = []
     for i in range(num_repeats):
         
-        print "\nMap %d - Mission %d of %d:" % ( imap, i+1, num_repeats )
+        print("\nMap %d - Mission %d of %d:" % ( imap, i+1, num_repeats ))
 
         my_mission_record = MalmoPython.MissionRecordSpec( "./save_%s-map%d-rep%d.tgz" % (expID, imap, i) )
         my_mission_record.recordCommands()
@@ -386,31 +386,31 @@ for imap in xrange(num_maps):
                 break
             except RuntimeError as e:
                 if retry == max_retries - 1:
-                    print "Error starting mission:",e
+                    print("Error starting mission:",e)
                     exit(1)
                 else:
                     time.sleep(2.5)
 
-        print "Waiting for the mission to start",
+        print("Waiting for the mission to start", end=' ')
         world_state = agent_host.getWorldState()
         while not world_state.has_mission_begun:
             sys.stdout.write(".")
             time.sleep(0.1)
             world_state = agent_host.getWorldState()
             for error in world_state.errors:
-                print "Error:",error.text
-        print
+                print("Error:",error.text)
+        print()
 
         # -- run the agent in the world -- #
         cumulative_reward = agent.run(agent_host)
-        print 'Cumulative reward: %d' % cumulative_reward
+        print('Cumulative reward: %d' % cumulative_reward)
         cumulative_rewards += [ cumulative_reward ]
 
         # -- clean up -- #
         time.sleep(0.5) # (let the Mod reset)
 
-    print "Done."
+    print("Done.")
 
-    print
-    print "Cumulative rewards for all %d runs:" % num_repeats
-    print cumulative_rewards
+    print()
+    print("Cumulative rewards for all %d runs:" % num_repeats)
+    print(cumulative_rewards)

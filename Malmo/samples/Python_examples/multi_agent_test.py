@@ -45,11 +45,11 @@ agent_hosts[0].addOptionalIntArgument("agents,n", "Number of agents to use, incl
 try:
     agent_hosts[0].parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_hosts[0].getUsage()
+    print('ERROR:',e)
+    print(agent_hosts[0].getUsage())
     exit(1)
 if agent_hosts[0].receivedArgument("help"):
-    print agent_hosts[0].getUsage()
+    print(agent_hosts[0].getUsage())
     exit(0)
 
 DEBUG = agent_hosts[0].receivedArgument("debug")
@@ -60,13 +60,13 @@ NUM_MOBS = NUM_AGENTS * 2
 NUM_ITEMS = NUM_AGENTS * 2
 
 # Create the rest of the agent hosts - one for each robot, plus one to give a bird's-eye view:
-agent_hosts += [MalmoPython.AgentHost() for x in xrange(1, NUM_AGENTS + 1) ]
+agent_hosts += [MalmoPython.AgentHost() for x in range(1, NUM_AGENTS + 1) ]
 
 # Set up debug output:
 for ah in agent_hosts:
     ah.setDebugOutput(DEBUG)    # Turn client-pool connection messages on/off.
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 def agentName(i):
     return "Robot#" + str(i + 1)
@@ -80,8 +80,8 @@ def startMission(agent_host, my_mission, my_client_pool, my_mission_record, role
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 # In a multi-agent mission, startMission will fail if the integrated server
@@ -146,7 +146,7 @@ def getVelocity(this_agent, entities, current_yaw, current_pos, current_health):
 
 def drawMobs():
     xml = ""
-    for i in xrange(NUM_MOBS):
+    for i in range(NUM_MOBS):
         x = str(random.randint(-17,17))
         z = str(random.randint(-17,17))
         xml += '<DrawEntity x="' + x + '" y="214" z="' + z + '" type="Zombie"/>'
@@ -154,7 +154,7 @@ def drawMobs():
 
 def drawItems():
     xml = ""
-    for i in xrange(NUM_ITEMS):
+    for i in range(NUM_ITEMS):
         x = str(random.randint(-17,17))
         z = str(random.randint(-17,17))
         xml += '<DrawItem x="' + x + '" y="224" z="' + z + '" type="apple"/>'
@@ -192,7 +192,7 @@ def getXML(reset):
     # Add an agent section for each robot. Robots run in survival mode.
     # Give each one a wooden pickaxe for protection...
 
-    for i in xrange(NUM_AGENTS):
+    for i in range(NUM_AGENTS):
       xml += '''<AgentSection mode="Survival">
         <Name>''' + agentName(i) + '''</Name>
         <AgentStart>
@@ -245,7 +245,7 @@ def getXML(reset):
 # are attempting to find the server - so this will fail for any agents on a
 # different machine.
 client_pool = MalmoPython.ClientPool()
-for x in xrange(10000, 10000 + NUM_AGENTS + 1):
+for x in range(10000, 10000 + NUM_AGENTS + 1):
     client_pool.add( MalmoPython.ClientInfo('127.0.0.1', x) )
 
 # Keep score of how our robots are doing:
@@ -255,8 +255,8 @@ zombie_kill_scores = [0 for x in range(NUM_AGENTS)] # Good! Help rescue humanity
 player_kill_scores = [0 for x in range(NUM_AGENTS)] # Bad! Don't kill the other players!
 
 num_missions = 5 if INTEGRATION_TEST_MODE else 30000
-for mission_no in xrange(1, num_missions+1):
-    print "Running mission #" + str(mission_no)
+for mission_no in range(1, num_missions+1):
+    print("Running mission #" + str(mission_no))
     # Create mission xml - use forcereset if this is the first mission.
     my_mission = MalmoPython.MissionSpec(getXML("true" if mission_no == 1 else "false"), True)
 
@@ -280,7 +280,7 @@ for mission_no in xrange(1, num_missions+1):
 
     # Wait for mission to start - complicated by having multiple agent hosts, and the potential
     # for multiple errors to occur in the start-up process.
-    print "Waiting for the mission to start ",
+    print("Waiting for the mission to start ", end=' ')
     hasBegun = False
     hadErrors = False
     while not hasBegun and not hadErrors:
@@ -292,12 +292,12 @@ for mission_no in xrange(1, num_missions+1):
                 hasBegun = True
             if len(world_state.errors):
                 hadErrors = True
-                print "Errors from agent " + agentName(agent_hosts.index(ah))
+                print("Errors from agent " + agentName(agent_hosts.index(ah)))
                 for error in world_state.errors:
-                    print "Error:",error.text
+                    print("Error:",error.text)
 
     if hadErrors:
-        print "ABORTING"
+        print("ABORTING")
         exit(1)
 
     time.sleep(1)
@@ -312,7 +312,7 @@ for mission_no in xrange(1, num_missions+1):
     timed_out = False
 
     while num_responsive_agents() > 0 and not timed_out:
-        for i in xrange(NUM_AGENTS):
+        for i in range(NUM_AGENTS):
             ah = agent_hosts[i]
             world_state = ah.getWorldState()
             if world_state.is_mission_running == False:
@@ -322,25 +322,25 @@ for mission_no in xrange(1, num_missions+1):
                 msg = world_state.observations[-1].text
                 ob = json.loads(msg)
                 if "Yaw" in ob:
-                    current_yaw[i] = ob[u'Yaw']
+                    current_yaw[i] = ob['Yaw']
                 if "Life" in ob:
-                    life = ob[u'Life']
+                    life = ob['Life']
                     if life != current_life[i]:
                         current_life[i] = life
                 if "PlayersKilled" in ob:
-                    player_kill_scores[i] = -ob[u'PlayersKilled']
+                    player_kill_scores[i] = -ob['PlayersKilled']
                 if "MobsKilled" in ob:
-                    zombie_kill_scores[i] = ob[u'MobsKilled']
+                    zombie_kill_scores[i] = ob['MobsKilled']
                 if "XPos" in ob and "ZPos" in ob:
-                    current_pos[i] = (ob[u'XPos'], ob[u'ZPos'])
+                    current_pos[i] = (ob['XPos'], ob['ZPos'])
                 if "entities" in ob:
                     entities = [EntityInfo(**k) for k in ob["entities"]]
                     turn, speed = getVelocity(agentName(i), entities, current_yaw[i], current_pos[i], current_life[i])
                     ah.sendCommand("move " + str(speed))
                     ah.sendCommand("turn " + str(turn))
-                if u'LineOfSight' in ob:
-                    los = ob[u'LineOfSight']
-                    if los[u'hitType'] == "entity" and los[u'inRange'] and los[u'type'] == "Zombie":
+                if 'LineOfSight' in ob:
+                    los = ob['LineOfSight']
+                    if los['hitType'] == "entity" and los['inRange'] and los['type'] == "Zombie":
                         ah.sendCommand("attack 1")
                         ah.sendCommand("attack 0")
             elif world_state.number_of_observations_since_last_state == 0:
@@ -350,7 +350,7 @@ for mission_no in xrange(1, num_missions+1):
                     apple_scores[i] += rew.getValue()
 
         time.sleep(0.05)
-    print
+    print()
 
     if not timed_out:
         # All agents except the watcher have died.
@@ -359,12 +359,12 @@ for mission_no in xrange(1, num_missions+1):
         agent_hosts[-1].sendCommand("quit")
     else:
         # We timed out. Bonus score to any agents that survived!
-        for i in xrange(NUM_AGENTS):
+        for i in range(NUM_AGENTS):
             if unresponsive_count[i] > 0:
-                print "SURVIVOR: " + agentName(i)
+                print("SURVIVOR: " + agentName(i))
                 survival_scores[i] += 1
 
-    print "Waiting for mission to end ",
+    print("Waiting for mission to end ", end=' ')
     # Mission should have ended already, but we want to wait until all the various agent hosts
     # have had a chance to respond to their mission ended message.
     hasEnded = False
@@ -377,7 +377,7 @@ for mission_no in xrange(1, num_missions+1):
             if world_state.is_mission_running:
                 hasEnded = False # all not good
 
-    win_counts = [0 for robot in xrange(NUM_AGENTS)]
+    win_counts = [0 for robot in range(NUM_AGENTS)]
     winner_survival = survival_scores.index(max(survival_scores))
     winner_zombies = zombie_kill_scores.index(max(zombie_kill_scores))
     winner_players = player_kill_scores.index(max(player_kill_scores))
@@ -387,14 +387,14 @@ for mission_no in xrange(1, num_missions+1):
     win_counts[winner_players] += 1
     win_counts[winner_apples] += 1
 
-    print
-    print "========================================="
-    print "Survival scores: ", survival_scores, "Winner: ", agentName(winner_survival)
-    print "Zombie kill scores: ", zombie_kill_scores, "Winner: ", agentName(winner_zombies)
-    print "Player kill scores: ", player_kill_scores, "Winner: ", agentName(winner_players)
-    print "Apple scores: ", apple_scores, "Winner: ", agentName(winner_apples)
-    print "========================================="
-    print "CURRENT OVERALL WINNER: " + agentName(win_counts.index(max(win_counts)))
-    print
+    print()
+    print("=========================================")
+    print("Survival scores: ", survival_scores, "Winner: ", agentName(winner_survival))
+    print("Zombie kill scores: ", zombie_kill_scores, "Winner: ", agentName(winner_zombies))
+    print("Player kill scores: ", player_kill_scores, "Winner: ", agentName(winner_players))
+    print("Apple scores: ", apple_scores, "Winner: ", agentName(winner_apples))
+    print("=========================================")
+    print("CURRENT OVERALL WINNER: " + agentName(win_counts.index(max(win_counts))))
+    print()
 
     time.sleep(2)

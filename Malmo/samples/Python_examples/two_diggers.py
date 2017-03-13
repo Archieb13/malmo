@@ -28,7 +28,7 @@ import random
 import sys
 import time
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 # -- set up two agent hosts --
 agent_host1 = MalmoPython.AgentHost()
@@ -37,11 +37,11 @@ agent_host2 = MalmoPython.AgentHost()
 try:
     agent_host1.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host1.getUsage()
+    print('ERROR:',e)
+    print(agent_host1.getUsage())
     exit(1)
 if agent_host1.receivedArgument("help"):
-    print agent_host1.getUsage()
+    print(agent_host1.getUsage())
     exit(0)
 
 
@@ -108,20 +108,20 @@ time.sleep(10)
 agent_host2.startMission( my_mission, client_pool, MalmoPython.MissionRecordSpec(), 1, '' )
 
 for agent_host in [ agent_host1, agent_host2 ]:
-    print "Waiting for the mission to start",
+    print("Waiting for the mission to start", end=' ')
     world_state = agent_host.peekWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.peekWorldState()
         for error in world_state.errors:
-            print "Error:",error.text
-    print
+            print("Error:",error.text)
+    print()
 
 # perform a few actions
 reps = 3
 time.sleep(1)
-for i in xrange(reps):
+for i in range(reps):
     agent_host1.sendCommand('attack 1')
     agent_host2.sendCommand('attack 1')
     time.sleep(1)
@@ -140,8 +140,8 @@ world_state1 = agent_host1.getWorldState()
 world_state2 = agent_host2.getWorldState()
 reward1 = sum(reward.getValue() for reward in world_state1.rewards)
 reward2 = sum(reward.getValue() for reward in world_state2.rewards)
-print 'Agent 1 received',reward1
-print 'Agent 2 received',reward2
+print('Agent 1 received',reward1)
+print('Agent 2 received',reward2)
 assert reward1 == expected_reward1, 'ERROR: agent 1 should have received a reward of '+str(expected_reward1)+', not '+str(reward1)
 assert reward2 == expected_reward2, 'ERROR: agent 2 should have received a reward of '+str(expected_reward2)+', not '+str(reward2)
 
@@ -213,15 +213,15 @@ time.sleep(10)
 agent_host2.startMission( my_mission, client_pool, MalmoPython.MissionRecordSpec(), 1, '' )
 
 for agent_host in [ agent_host1, agent_host2 ]:
-    print "Waiting for the mission to start",
+    print("Waiting for the mission to start", end=' ')
     world_state = agent_host.peekWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.peekWorldState()
         for error in world_state.errors:
-            print "Error:",error.text
-    print
+            print("Error:",error.text)
+    print()
 
 # perform a few actions
 time.sleep(1)
@@ -252,7 +252,7 @@ world_state1 = agent_host1.getWorldState()
 world_state2 = agent_host2.getWorldState()
 reward1 = sum(reward.getValue() for reward in world_state1.rewards)
 reward2 = sum(reward.getValue() for reward in world_state2.rewards)
-print 'Agent 1 received',reward1
-print 'Agent 2 received',reward2
+print('Agent 1 received',reward1)
+print('Agent 2 received',reward2)
 assert reward1 == expected_reward1, 'ERROR: agent 1 should have received a reward of '+str(expected_reward1)+', not '+str(reward1)
 assert reward2 == expected_reward2, 'ERROR: agent 2 should have received a reward of '+str(expected_reward2)+', not '+str(reward2)

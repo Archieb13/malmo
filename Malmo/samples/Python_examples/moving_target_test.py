@@ -106,7 +106,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST: # ignore error if already existed
         raise
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 validate = True
 my_client_pool = MalmoPython.ClientPool()
@@ -116,11 +116,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 if agent_host.receivedArgument("test"):
@@ -139,8 +139,8 @@ for iRepeat in range(num_reps):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 time.sleep(2)
@@ -157,13 +157,13 @@ for iRepeat in range(num_reps):
         if world_state.number_of_observations_since_last_state > 0:
             msg = world_state.observations[-1].text
             ob = json.loads(msg)
-            new_turn_key = ob.get(u'turn_key', "")
-            turn_index = ob.get(u'turn_number',0)
+            new_turn_key = ob.get('turn_key', "")
+            turn_index = ob.get('turn_number',0)
             if len(new_turn_key) > 0 and new_turn_key != turn_key:
                 if agent_host.receivedArgument("test"):
                     nb = random.choice(["movenorth","movesouth","moveeast","movewest"])
                 else:
-                    nb = raw_input('Enter command: ')
+                    nb = input('Enter command: ')
                 agent_host.sendCommand(nb, str(new_turn_key))
                 turn_key = new_turn_key
 

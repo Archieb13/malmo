@@ -21,10 +21,11 @@
 
 import MalmoPython
 import os
+import io
 import sys
 import time
-from Tkinter import *
-import tkMessageBox
+from tkinter import *
+import tkinter.messagebox
 from PIL import Image
 from PIL import ImageTk
 
@@ -78,14 +79,14 @@ class HumanAgentHost:
         # decide on the action space
         command_handlers = mission_spec.getListOfCommandHandlers(role)
         if 'ContinuousMovement' in command_handlers and 'DiscreteMovement' in command_handlers:
-            print 'ERROR: Ambiguous action space in supplied mission: both continuous and discrete command handlers present.'
+            print('ERROR: Ambiguous action space in supplied mission: both continuous and discrete command handlers present.')
             exit(1)
         elif 'ContinuousMovement' in command_handlers:
             self.action_space = 'continuous'
         elif 'DiscreteMovement' in command_handlers:
             self.action_space = 'discrete'
         else:
-            print 'ERROR: Unknown action space in supplied mission: neither continuous or discrete command handlers present.'
+            print('ERROR: Unknown action space in supplied mission: neither continuous or discrete command handlers present.')
             exit(1)
 
         self.createGUI()
@@ -105,18 +106,18 @@ class HumanAgentHost:
         try:
             self.agent_host.startMission( mission_spec, mission_record_spec )
         except RuntimeError as e:
-            tkMessageBox.showerror("Error","Error starting mission: "+str(e))
+            tkinter.messagebox.showerror("Error","Error starting mission: "+str(e))
             return
 
-        print "Waiting for the mission to start",
+        print("Waiting for the mission to start", end=' ')
         self.world_state = self.agent_host.peekWorldState()
         while not self.world_state.has_mission_begun:
             sys.stdout.write(".")
             time.sleep(0.1)
             self.world_state = self.agent_host.peekWorldState()
             for error in self.world_state.errors:
-                print "Error:",error.text
-        print
+                print("Error:",error.text)
+        print()
         if self.action_space == 'continuous':
             self.canvas.config(cursor='none') # hide the mouse cursor while over the canvas
             self.canvas.event_generate('<Motion>', warp=True, x=self.canvas.winfo_width()/2, y=self.canvas.winfo_height()/2) # put cursor at center
@@ -129,7 +130,8 @@ class HumanAgentHost:
                 self.observation.config(text = self.world_state.observations[0].text )
             if mission_spec.isVideoRequested(0) and self.world_state.number_of_video_frames_since_last_state > 0:
                 frame = self.world_state.video_frames[-1]
-                image = Image.frombytes('RGB', (frame.width,frame.height), str(frame.pixels) )
+                image_io = io.BytesIO(frame.pixels)
+                image = Image.frombytes('RGB', (frame.width,frame.height), image_io.open() )
                 photo = ImageTk.PhotoImage(image)
                 self.canvas.delete("all")
                 self.canvas.create_image(frame.width/2, frame.height/2, image=photo)
@@ -143,9 +145,9 @@ class HumanAgentHost:
             time.sleep(0.01)
         if self.action_space == 'continuous':
             self.canvas.config(cursor='arrow') # restore the mouse cursor
-        print 'Mission stopped'
+        print('Mission stopped')
         if not self.agent_host.receivedArgument("test"):
-            tkMessageBox.showinfo("Mission ended","Mission has ended. Total reward: " + str(total_reward) )
+            tkinter.messagebox.showinfo("Mission ended","Mission has ended. Total reward: " + str(total_reward) )
         self.root_frame.destroy()
         
     def createGUI( self ):
@@ -266,7 +268,7 @@ class HumanAgentHost:
         elif event.keysym in keysym_map:
             self.agent_host.sendCommand( keysym_map[ event.keysym ] )
             
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 human_agent_host = HumanAgentHost()
 human_agent_host.addOptionalStringArgument( "mission_xml,m", "Mission XML file name.", "" )
@@ -274,11 +276,11 @@ human_agent_host.addOptionalIntArgument( "role", "The role of the human agent. Z
 try:
     human_agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print human_agent_host.getUsage()
+    print('ERROR:',e)
+    print(human_agent_host.getUsage())
     exit(1)
 if human_agent_host.receivedArgument("help"):
-    print human_agent_host.getUsage()
+    print(human_agent_host.getUsage())
     exit(0)
     
 my_role = human_agent_host.getIntArgument("role")

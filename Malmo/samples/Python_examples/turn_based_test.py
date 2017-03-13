@@ -54,11 +54,11 @@ agent_host = MalmoPython.AgentHost()    # Purely for parsing command line
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 if agent_host.receivedArgument("test"):
     TESTING = True
@@ -177,8 +177,8 @@ class ThreadedAgent(threading.Thread):
                 break
             except RuntimeError as e:
                 if retry == max_retries - 1:
-                    print "Error starting mission",e
-                    print "Is the game running?"
+                    print("Error starting mission",e)
+                    print("Is the game running?")
                     exit(1)
                 else:
                     time.sleep(1)
@@ -200,8 +200,8 @@ class ThreadedAgent(threading.Thread):
             if world_state.number_of_observations_since_last_state > 0:
                 obvsText = world_state.observations[-1].text
                 data = json.loads(obvsText) # observation comes in as a JSON string...
-                new_turn_key = data.get(u'turn_key', "")
-                turn_index = data.get(u'turn_number',0)
+                new_turn_key = data.get('turn_key', "")
+                turn_index = data.get('turn_number',0)
                 if len(new_turn_key) > 0 and new_turn_key != turn_key:
                     # Our turn to take a move!
                     # First, print our word. We do this *before* calling sendCommand
@@ -210,7 +210,7 @@ class ThreadedAgent(threading.Thread):
                     if turn_index <= len(self.words):
                         word = self.words[turn_index - 1]
                         reconstructed_text += word + " "
-                        print word,
+                        print(word, end=' ')
                     self.agent_host.sendCommand("move 1", str(new_turn_key))
                     turn_key = new_turn_key
             time.sleep(0.001) # Helps python thread scheduler if we sleep a bit
@@ -229,7 +229,7 @@ class ThreadedAgent(threading.Thread):
         time.sleep(2)
         self.agent_host = None
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 # Create a pool of Minecraft Mod clients.
 # By default, mods will choose consecutive mission control ports, starting at 10000,
@@ -243,12 +243,12 @@ my_client_pool.add(MalmoPython.ClientInfo("127.0.0.1", 10002))
 words = description_text.split()
 # Pad to a multiple of num_agents:
 if len(words) % 3 > 0:
-    for i in xrange(3-(len(words)%3)):
+    for i in range(3-(len(words)%3)):
         words.append("----")
 full_text = " ".join(words)
 
 iterations = 10 if TESTING else 30000
-for mission_no in xrange(iterations):
+for mission_no in range(iterations):
     reconstructed_text = ""
     mission_xml = GetMissionXML("Race!")
     agents = [ThreadedAgent(0, my_client_pool, mission_xml),
@@ -257,8 +257,8 @@ for mission_no in xrange(iterations):
 
     num_agents = len(agents)
 
-    for i in xrange(num_agents):
-        stream = [words[j] for j in xrange(i, len(words), num_agents)]
+    for i in range(num_agents):
+        stream = [words[j] for j in range(i, len(words), num_agents)]
         agents[i].setWords(stream)
 
     for agent in agents:
@@ -267,13 +267,13 @@ for mission_no in xrange(iterations):
     for agent in agents:
         agent.join()
 
-    print
+    print()
     for agent in agents:
-        print agent.role, agent.reward, agent.mission_end_message
+        print(agent.role, agent.reward, agent.mission_end_message)
     reconstructed_text = reconstructed_text.strip() # Deal with trailing space.
     if full_text != reconstructed_text:
-        print "ERROR!"
-        print "Expected: ", full_text
-        print "Received: ", reconstructed_text
+        print("ERROR!")
+        print("Expected: ", full_text)
+        print("Received: ", reconstructed_text)
         if TESTING:
             exit(1)

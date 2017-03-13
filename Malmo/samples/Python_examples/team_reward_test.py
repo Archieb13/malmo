@@ -45,7 +45,7 @@ import sys
 import time
 import re
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 # -- set up two agent hosts --
 agent_host_simeon = MalmoPython.AgentHost()
@@ -54,11 +54,11 @@ agent_host_fred = MalmoPython.AgentHost()
 try:
     agent_host_simeon.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host_simeon.getUsage()
+    print('ERROR:',e)
+    print(agent_host_simeon.getUsage())
     exit(1)
 if agent_host_simeon.receivedArgument("help"):
-    print agent_host_simeon.getUsage()
+    print(agent_host_simeon.getUsage())
     exit(0)
 
 
@@ -128,22 +128,22 @@ client_pool.add( MalmoPython.ClientInfo('127.0.0.1',10001) )
 
 # Fred's instructions for building a staircase, calculated in advance:
 instructions=[]
-for x in xrange(20):
+for x in range(20):
     instructions.append("move -1")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("strafe -1")
     instructions.append("move 1")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("attack")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("strafe 1")
     instructions.append("move 1")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("strafe 1")
     instructions.append("move -1")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("jumpuse")
-    for y in xrange(x+1):
+    for y in range(x+1):
         instructions.append("strafe -1")
 
 expected_reward_simeon = len(instructions)  # One point for every instruction acted on.
@@ -153,15 +153,15 @@ time.sleep(10)
 agent_host_fred.startMission( my_mission, client_pool, MalmoPython.MissionRecordSpec(), 1, '' )
 
 for agent_host in [ agent_host_simeon, agent_host_fred ]:
-    print "Waiting for the mission to start",
+    print("Waiting for the mission to start", end=' ')
     world_state = agent_host.peekWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.peekWorldState()
         for error in world_state.errors:
-            print "Error:",error.text
-    print
+            print("Error:",error.text)
+    print()
 
 time.sleep(1)
 i = 0
@@ -174,7 +174,7 @@ reward_simeon = 0
 # In a real scenario, each agent could have its own process, or at least thread.
 while agent_host_simeon.peekWorldState().is_mission_running or agent_host_fred.peekWorldState().is_mission_running:
     if sendNewInstruction:
-        print "Sending command:", instructions[i]
+        print("Sending command:", instructions[i])
         agent_host_simeon.sendCommand("chat " + instructions[i])
         sendNewInstruction = False
 
@@ -187,7 +187,7 @@ while agent_host_simeon.peekWorldState().is_mission_running or agent_host_fred.p
         # and Fred only sends a command when Simeon has sent a chat message.
         # So the presence of a reward signal indicates that it's time for the next chat message.
         i += 1
-        print "Ready for next command"
+        print("Ready for next command")
         if i < len(instructions):
             sendNewInstruction = True
         else:
@@ -200,10 +200,10 @@ while agent_host_simeon.peekWorldState().is_mission_running or agent_host_fred.p
             reward_fred += reward.getValue()
 
     for obs in world_state.observations:
-        print "Observation!"
+        print("Observation!")
         msg = obs.text
         ob = json.loads(msg)
-        chat = ob.get(u'Chat', "")
+        chat = ob.get('Chat', "")
         for command in chat:
             parts = command.split("> ")
             if len(parts) > 1:
@@ -214,5 +214,5 @@ world_state1 = agent_host_simeon.getWorldState()
 world_state2 = agent_host_fred.getWorldState()
 reward_simeon += sum(reward.getValue() for reward in world_state1.rewards)
 reward_fred += sum(reward.getValue() for reward in world_state2.rewards)
-print 'Simeon received',reward_simeon
-print 'Fred received',reward_fred
+print('Simeon received',reward_simeon)
+print('Fred received',reward_fred)

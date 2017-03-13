@@ -20,6 +20,7 @@ plugins {
     id "net.minecraftforge.gradle.forge" version "2.0.1"
 }
 
+
 // Read the version number from the Mod's version properties file.
 if (!file('src/main/resources/version.properties').exists()) {
     ant.fail("version.properties file is missing - this is created automatically by CMake. If you are building from source, make sure you have built the full source tree, not just the Minecraft folder.")
@@ -35,7 +36,7 @@ archivesBaseName = "MalmoMod"
 minecraft {
     version = "1.8-11.14.3.1543"
     runDir = "run"
-    
+
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
     // stable_#            stables are built at the discretion of the MCP team.
@@ -62,7 +63,7 @@ dependencies {
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-      
+
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
@@ -90,11 +91,11 @@ processResources
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
+
         // replace version and mcversion
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-        
+
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
@@ -151,7 +152,7 @@ task jaxb() {
 
     inputs.files fileTree( dir: 'src/main/resources', include:'*.xsd' )
     outputs.dir 'src/main/java/com/microsoft/Malmo/Schemas'
-    
+
     doLast {
         // first clear the old .java files out of the folder in case some are no longer current
         delete fileTree(dir: 'src/main/java/com/microsoft/Malmo/Schemas', include: '*.java')

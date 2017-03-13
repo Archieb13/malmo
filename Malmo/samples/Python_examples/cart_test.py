@@ -91,7 +91,7 @@ def drawloop(radius, y):
 def drawloops(radius, y):
     ''' Draw a set of concentric loops '''
     loops=""
-    for i in xrange(radius, 1, -2):
+    for i in range(radius, 1, -2):
         loops += drawloop(i, y)
         y += 1
     return loops
@@ -113,7 +113,7 @@ def drawstep(radius, y, type, half):
 def drawsteps(radius, y):
     ''' Draw a pyramid of steps '''
     steps = ""
-    for i in xrange(radius, 1, -2):
+    for i in range(radius, 1, -2):
         steps += drawstep(i, y, "quartz_stairs", "bottom")
         steps += drawstep(i, y-1, "dark_oak_stairs", "top")
         y += 1
@@ -122,7 +122,7 @@ def drawsteps(radius, y):
 def drawlinks(radius, y):
     ''' Link each circuit of powered rail into the adjacent inner loop '''
     links=""
-    for i in xrange(radius, 1, -2):
+    for i in range(radius, 1, -2):
         links += drawlink(i, y)
         y += 1
     return links
@@ -159,14 +159,14 @@ def drawHilbert(level, x, y, z):
     curve = a
     
     # Perform repeated substitutions:
-    for i in xrange(level):
+    for i in range(level):
         curve = expand_pattern.sub(expand_func, curve)
 
     # Remove the fluff:
     curve = expand_pattern.sub("",curve)
 
     # Concatenate the turns (not really necessary, but saves time in the next step)
-    reduce_pattern = re.compile(u"[LR]+")
+    reduce_pattern = re.compile("[LR]+")
     reduce_func = lambda match: "" if len(match.group(0)) % 2 == 0 else match.group(0)[0]
     curve = reduce_pattern.sub(reduce_func, curve)
 
@@ -209,11 +209,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 endCondition = ""
@@ -327,7 +327,7 @@ missionXML = '''<?xml version="1.0" encoding="UTF-8" ?>
 
     </Mission>'''
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 my_mission = MalmoPython.MissionSpec(missionXML,True)
 
 my_mission_record = MalmoPython.MissionRecordSpec()
@@ -338,8 +338,8 @@ for retry in range(max_retries):
         break
     except RuntimeError as e:
         if retry == max_retries - 1:
-            print "Error starting mission",e
-            print "Is the game running?"
+            print("Error starting mission",e)
+            print("Is the game running?")
             exit(1)
         else:
             time.sleep(2)
@@ -360,11 +360,11 @@ while world_state.is_mission_running:
     if world_state.number_of_observations_since_last_state > 0:
         obvsText = world_state.observations[-1].text
         data = json.loads(obvsText) # observation comes in as a JSON string...
-        current_x = data.get(u'XPos', 0)
-        current_z = data.get(u'ZPos', 0)
-        current_y = data.get(u'YPos', 0)
-        yaw = data.get(u'Yaw', 0)
-        pitch = data.get(u'Pitch', 0)
+        current_x = data.get('XPos', 0)
+        current_z = data.get('ZPos', 0)
+        current_y = data.get('YPos', 0)
+        yaw = data.get('Yaw', 0)
+        pitch = data.get('Pitch', 0)
         # Try to look somewhere interesting:
         if "entities" in data:
             entities = [EntityInfo(**k) for k in data["entities"]]
@@ -382,9 +382,9 @@ while world_state.is_mission_running:
         agent_host.sendCommand("turn " + str(deltaYaw))
 
 # mission has ended.
-print "Mission over"
+print("Mission over")
 reward = world_state.rewards[-1].getValue()
-print "Result: " + str(reward)
+print("Result: " + str(reward))
 if reward < 0:
     exit(1)
 else:

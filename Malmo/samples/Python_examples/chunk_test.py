@@ -71,12 +71,12 @@ def createTestStructure(sx, sy, sz):
     iterations = random.randint(10,25)
 
     # Run a cellular automata for a few iterations:
-    for i in xrange(iterations):
+    for i in range(iterations):
         if i == iterations - 1:
             colour = True   # Final iteration: don't apply the CA, just colour the cell.
-        for x in xrange(sx):
-            for y in xrange(sy):
-                for z in xrange(sz):
+        for x in range(sx):
+            for y in range(sy):
+                for z in range(sz):
                     tot = sum(neighbours(x,y,z)) - s[x][y][z]
                     result = s[x][y][z]
                     if colour:
@@ -102,20 +102,20 @@ def structureToXMLAndJson(structure, xorg, yorg, zorg):
     pallette = random.choice(palletes)
     drawing = ""
     json = []
-    for y in xrange(SIZE_Y):
-        for z in xrange(SIZE_Z):
-            for x in xrange(SIZE_X):
+    for y in range(SIZE_Y):
+        for z in range(SIZE_Z):
+            for x in range(SIZE_X):
                 value = structure[x][y][z]
                 if value > 0:
-                    type = pallette[value/5]
+                    type = pallette[int(value/5)]
                     parts = type.split()
                     type_string = ' type="' + parts[0] + '"'
                     if len(parts) > 1:
                         type_string += ' colour="' + parts[1] + '"'
                     drawing += '<DrawBlock x="' + str(x + xorg) + '" y="' + str(y + yorg) + '" z="' + str(z + zorg) + '" ' + type_string + '/>'
-                    json.append(u"" + parts[0])
+                    json.append("" + parts[0])
                 else:
-                    json.append(u"air")
+                    json.append("air")
     drawingdecorator = "<DrawingDecorator>"
     # "Blank out" the volume, in case if overlaps with old structures and throws the test.
     drawingdecorator += '<DrawCuboid x1="' + str(xorg) + '" y1="' + str(yorg) + '" z1="' + str(zorg) + '" x2="' + str(xorg + SIZE_X) + '" y2="' + str(yorg + SIZE_Y) + '" z2="' + str(zorg + SIZE_Z) + '" type="air"/>'
@@ -167,17 +167,17 @@ def getMissionXMLAndJson(forceReset, structure):
 
   </Mission>''', gridJson
     
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 num_iterations = 30000
@@ -187,7 +187,7 @@ if agent_host.receivedArgument("test"):
 my_mission_record = MalmoPython.MissionRecordSpec()
 structure = createTestStructure(SIZE_X, SIZE_Y, SIZE_Z) # Create the first one outside the loop.
 
-for i in xrange(num_iterations):
+for i in range(num_iterations):
     missionXML, gridJson = getMissionXMLAndJson('"false"', structure)
     my_mission = MalmoPython.MissionSpec(missionXML, True)
 
@@ -198,18 +198,18 @@ for i in xrange(num_iterations):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission:",e
+                print("Error starting mission:",e)
                 exit(1)
             else:
                 time.sleep(2)
 
-    print "Beginning test " + str(i) + "."
+    print("Beginning test " + str(i) + ".")
     world_state = agent_host.getWorldState()
     while not world_state.has_mission_begun:
         sys.stdout.write(".")
         time.sleep(0.1)
         world_state = agent_host.getWorldState()
-    print
+    print()
 
     agent_host.sendCommand("pitch -0.1")    # Start looking up, because it's pretty.
     # main loop:
@@ -218,26 +218,26 @@ for i in xrange(num_iterations):
         if world_state.number_of_observations_since_last_state > 0:
             obs = json.loads( world_state.observations[-1].text )
             if "structure" in obs:
-                struct = obs[u"structure"]
+                struct = obs["structure"]
                 if struct == gridJson:
-                    print
-                    print "MATCHING - moving to next mission."
-                    print
+                    print()
+                    print("MATCHING - moving to next mission.")
+                    print()
                     structure = createTestStructure(SIZE_X, SIZE_Y, SIZE_Z) # Create the next one while we enjoy this one.
                     agent_host.sendCommand("quit")
                     break
                 else:
-                    print
-                    print "No match - test failed on iteration " + str(i)
+                    print()
+                    print("No match - test failed on iteration " + str(i))
                     # Find the discrepancies:
                     index = 0
-                    for y in xrange(SIZE_Y):
-                        for z in xrange(SIZE_Z):
-                            for x in xrange(SIZE_X):
+                    for y in range(SIZE_Y):
+                        for z in range(SIZE_Z):
+                            for x in range(SIZE_X):
                                 expected = gridJson[index]
                                 actual = struct[index]
                                 if expected != actual:
-                                    print "(" + str(x) + "," + str(y) + "," + str(z) + "), -" + actual + " +" + expected
+                                    print("(" + str(x) + "," + str(y) + "," + str(z) + "), -" + actual + " +" + expected)
                                 index += 1
                     agent_host.sendCommand("quit")
                     if agent_host.receivedArgument("test"):

@@ -106,7 +106,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST: # ignore error if already existed
         raise
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 
 validate = True
 # Create a pool of Minecraft Mod clients.
@@ -123,11 +123,11 @@ agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
 except RuntimeError as e:
-    print 'ERROR:',e
-    print agent_host.getUsage()
+    print('ERROR:',e)
+    print(agent_host.getUsage())
     exit(1)
 if agent_host.receivedArgument("help"):
-    print agent_host.getUsage()
+    print(agent_host.getUsage())
     exit(0)
 
 itemdrawingxml = GetItemDrawingXML()
@@ -151,8 +151,8 @@ for iRepeat in range(num_reps):
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
-                print "Error starting mission",e
-                print "Is the game running?"
+                print("Error starting mission",e)
+                print("Is the game running?")
                 exit(1)
             else:
                 time.sleep(2)
@@ -176,12 +176,12 @@ for iRepeat in range(num_reps):
             if "close_entities" in ob:
                 entities = [EntityInfo(**k) for k in ob["close_entities"]]
                 for ent in entities:
-                    print ent.name, ent.x, ent.z, ent.quantity
+                    print(ent.name, ent.x, ent.z, ent.quantity)
             
             if "far_entities" in ob:
                 far_entities = [EntityInfo(**k) for k in ob["far_entities"]]
                 for ent in far_entities:
-                    print ent.name, ent.quantity
+                    print(ent.name, ent.quantity)
                 
         if world_state.number_of_rewards_since_last_state > 0:
             # A reward signal has come in - see what it is:
@@ -203,7 +203,7 @@ for iRepeat in range(num_reps):
         time.sleep(0.1)
         
     # mission has ended.
-    print "Mission " + str(iRepeat+1) + ": Reward = " + str(reward)
+    print("Mission " + str(iRepeat+1) + ": Reward = " + str(reward))
     for error in world_state.errors:
-        print "Error:",error.text
+        print("Error:",error.text)
     time.sleep(0.5) # Give the mod a little time to prepare for the next mission.

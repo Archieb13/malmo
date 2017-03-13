@@ -26,8 +26,9 @@ import subprocess
 import sys
 import time
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
 minecraft_path = os.path.dirname(os.path.abspath(__file__))
+print(minecraft_path)
 
 def PortHasListener( port ):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,27 +42,35 @@ if len(ports) == 0:
 
 for port in ports:
     if PortHasListener( port ):
-        print 'Something is listening on port',port,'- will assume Minecraft is running.'
+        print('Something is listening on port',port,'- will assume Minecraft is running.', flush=True)
         continue
         
-    print 'Nothing is listening on port',port,'- will attempt to launch Minecraft from a new terminal.'
+    print('Nothing is listening on port',port,'- will attempt to launch Minecraft from a new terminal.')
     if os.name == 'nt':
         subprocess.Popen([minecraft_path + '/launchClient.bat', '-port', str(port)], creationflags=subprocess.CREATE_NEW_CONSOLE, close_fds=True)
     elif sys.platform == 'darwin':
-        subprocess.Popen(['open', '-a', 'Terminal.app ' + minecraft_path + '/launchClient.sh', '-port', str(port)])
+        print("Trying this one ........Darwin")
+#        subprocess.Popen(['open', '-a', 'Terminal.app ' + minecraft_path + '/launchClient.sh', '-port', str(port)])
+        print("Trying this one ........")
+        cmd_str = minecraft_path + "/launchClient.sh -port " + str(port)
+        print(cmd_str)
+        subprocess.Popen( cmd_str, close_fds=True, shell=True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE )
     elif platform.linux_distribution()[0] == 'Fedora':
         subprocess.Popen( minecraft_path + "/launchClient.sh -port " + str(port), close_fds=True, shell=True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE )
     else:
-        subprocess.Popen( minecraft_path + "/launchClient.sh -port " + str(port), close_fds=True, shell=True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE )
-    print 'Giving Minecraft some time to launch... '
+        print("Trying this one ........")
+        cmd_str = minecraft_path + "/launchClient.sh -port " + str(port)
+        print(cmd_str)
+        subprocess.Popen( cmd_str, close_fds=True, shell=True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE )
+    print('Giving Minecraft some time to launch... ', flush=True)
     launched = False
-    for i in xrange( 100 ):
-        print '.',
+    for i in range( 100 ):
+        print('.', end=' ', flush=True)
         time.sleep( 3 )
         if PortHasListener( port ):
-            print 'ok'
+            print('ok', flush=True)
             launched = True
             break
     if not launched:
-        print 'Minecraft not yet launched. Giving up.'
+        print('Minecraft not yet launched. Giving up.', flush=True)
         exit(1)
