@@ -84,7 +84,7 @@ def getMissionXML(summary):
         </About>
 
         <ModSettings>
-            <MsPerTick>20</MsPerTick>
+            <MsPerTick>10</MsPerTick>
         </ModSettings>
         <ServerSection>
             <ServerInitialConditions>
@@ -268,10 +268,10 @@ for iRepeat in range(num_reps):
     for retry in range(max_retries):
         try:
             # Set up a recording
-            my_mission_record = MalmoPython.MissionRecordSpec(recordingsDirectory + "//" + "Mission_" + str(iRepeat) + ".tgz")
-            my_mission_record.recordRewards()
+            # my_mission_record = MalmoPython.MissionRecordSpec(recordingsDirectory + "//" + "Mission_" + str(iRepeat) + ".tgz")
+            # my_mission_record.recordRewards()
             # Attempt to start the mission:
-            agent_host.startMission( my_mission, my_client_pool, my_mission_record, 0, "predatorExperiment" )
+            agent_host.startMission( my_mission, my_client_pool, MalmoPython.MissionRecordSpec(), 0, "predatorExperiment" )
             break
         except RuntimeError as e:
             if retry == max_retries - 1:
@@ -319,7 +319,7 @@ for iRepeat in range(num_reps):
         if world_state.number_of_rewards_since_last_state > 0:
             # A reward signal has come in - see what it is:
             total_reward += world_state.rewards[-1].getValue()
-        time.sleep(0.02)
+        # time.sleep(0.001)
         flash = False
 
     # mission has ended.

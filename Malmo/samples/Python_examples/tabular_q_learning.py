@@ -274,7 +274,7 @@ class TabQAgent:
                     value = self.q_table[s][action]
                     color = 255 * ( value - min_value ) / ( max_value - min_value ) # map value to 0-255
                     color = max( min( color, 255 ), 0 ) # ensure within [0,255]
-                    color_string = '#%02x%02x%02x' % (255-color, color, 0)
+                    color_string = '#%02x%02x%02x' % (int(255-color), int(color), 0)
                     self.canvas.create_oval( (world_x - 1 - x + action_positions[action][0] - action_radius ) *scale,
                                              (world_y - 1 - y + action_positions[action][1] - action_radius ) *scale,
                                              (world_x - 1 - x + action_positions[action][0] + action_radius ) *scale,
@@ -294,7 +294,7 @@ agent_host = MalmoPython.AgentHost()
 
 # add some args
 agent_host.addOptionalStringArgument('mission_file',
-    'Path/to/file from which to load the mission.', '../Sample_missions/cliff_walking_1.xml')
+    'Path/to/file from which to load the mission.', '../../../sample_missions/cliff_walking_1.xml')
 agent_host.addOptionalFloatArgument('alpha',
     'Learning rate of the Q-learning agent.', 0.1)
 agent_host.addOptionalFloatArgument('epsilon',

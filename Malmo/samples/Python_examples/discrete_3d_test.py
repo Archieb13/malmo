@@ -209,7 +209,7 @@ def structureToXML(structure, xorg, yorg, zorg, pallette):
             for x in range(SIZE_X):
                 value = structure[x][y][z]
                 if value > 0:
-                    type = pallette[int(value/5)]
+                    type = pallette[value//5]
                     parts = type.split()
                     type_string = ' type="' + parts[0] + '"'
                     if len(parts) > 1:
@@ -286,10 +286,10 @@ def getMissionXML(forceReset, structure, mode, pathtype, mission_description):
         current_y = p[1]
         current_z = p[2]
 
-        pathxml += '<DrawBlock x="' + str(p[0]) + '" y="' + str(p[1]) + '" z="' + str(p[2]) + '" type="emerald_block"/>'
+        pathxml += '<DrawBlock x="' + str(int(p[0])) + '" y="' + str(int(p[1])) + '" z="' + str(int(p[2])) + '" type="emerald_block"/>'
         subgoalxml += '<Point x="' + str(p[0]+0.5) + '" y="' + str(p[1]) + '" z="' + str(p[2]+0.5) + '" tolerance="' + str(tol) + '" description="' + description + '" />'
     reward_item = "golden_apple" if path[0][1] == yorg else "apple"
-    pathxml += '<DrawItem x="' + str(path[0][0]) + '" y="' + str(path[0][1]+1) + '" z="' + str(path[0][2]) + '" type="' + reward_item + '"/>'
+    pathxml += '<DrawItem x="' + str(int(path[0][0])) + '" y="' + str(int(path[0][1]+1)) + '" z="' + str(int(path[0][2])) + '" type="' + reward_item + '"/>'
     pathxml += '</DrawingDecorator>'
     commandxml = '<ContinuousMovementCommands/>'
     if mode != MovementModes.Continuous:
@@ -413,9 +413,10 @@ for i in range(num_iterations):
     pathtype = PathTypes.Silly if (i / len(MovementModes)) % 2 == 0 else PathTypes.Sensible
     description = "3D navtest #" + str(i+1) + "; Actions=" + MovementModes[mode] + "; Path=" + PathTypes[pathtype]
     missionXML = getMissionXML('"false"', structure, mode, pathtype, description)
+    print (missionXML)
     if recording:
         my_mission_record.setDestination(recordingsDirectory + "//" + "Mission_" + str(i+1) + ".tgz")
-    my_mission = MalmoPython.MissionSpec(missionXML, False)
+    my_mission = MalmoPython.MissionSpec(missionXML, True)
 
     print("")
     print("")

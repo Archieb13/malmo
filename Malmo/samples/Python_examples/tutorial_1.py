@@ -68,6 +68,10 @@ while not world_state.has_mission_begun:
 print()
 print(("Mission running ",))
 
+agent_host.sendCommand("turn -0.5")
+agent_host.sendCommand("move 1")
+agent_host.sendCommand("jump 1")
+
 # Loop until mission ends:
 while world_state.is_mission_running:
     sys.stdout.write(".")

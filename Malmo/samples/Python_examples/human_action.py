@@ -130,8 +130,7 @@ class HumanAgentHost:
                 self.observation.config(text = self.world_state.observations[0].text )
             if mission_spec.isVideoRequested(0) and self.world_state.number_of_video_frames_since_last_state > 0:
                 frame = self.world_state.video_frames[-1]
-                image_io = io.BytesIO(frame.pixels)
-                image = Image.frombytes('RGB', (frame.width,frame.height), image_io.open() )
+                image = Image.frombytes('RGB', (frame.width,frame.height), bytes(frame.pixels))
                 photo = ImageTk.PhotoImage(image)
                 self.canvas.delete("all")
                 self.canvas.create_image(frame.width/2, frame.height/2, image=photo)

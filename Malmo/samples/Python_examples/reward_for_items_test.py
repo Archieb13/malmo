@@ -171,6 +171,8 @@ for iRepeat in range(num_reps):
     while world_state.is_mission_running:
         world_state = agent_host.getWorldState()
         if world_state.number_of_observations_since_last_state > 0:
+            if world_state.number_of_observations_since_last_state > 1:
+                    print("MULTIPLE OBSERVATIONS***", world_state.number_of_observations_since_last_state, len(world_state.observations))
             msg = world_state.observations[-1].text
             ob = json.loads(msg)
             if "close_entities" in ob:
